@@ -31,7 +31,7 @@
 
     <script>
         /**
-         * CONFIGURAÇÕES TÉCNICAS E ESTÉTICAS Y2K
+         * CONFIGURAÇÕES TÉCNICAS E ESTÉTICAS Y2K - GLOW & VIBRANTE
          */
         const TWITCH_CHANNEL = 'felipecanneli';
         
@@ -39,16 +39,16 @@
             orange: new THREE.Color(0xFF5C00),
             white: new THREE.Color(0xFFFFFF),
             slime: new THREE.Color(0xCCFF00),
-            blue: new THREE.Color(0x00E5FF)
+            blue: new THREE.Color(0x00E5FF),
+            black: new THREE.Color(0x000000)
         };
 
         const CONFIG = {
             depth: 50,
-            blockGap: 160, 
+            blockGap: 165, 
             maxMessages: 5,
-            // Recuo das bordas (Canto Inferior Esquerdo)
             offsetX: -420, 
-            offsetY: -400,
+            offsetY: -420,
         };
 
         let scene, camera, renderer, clock;
@@ -63,17 +63,23 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            // Tonemapping para controlar o estouro de luz
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Luzes estilo LaChapelle / Nick
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            // Ajuste de Luzes: Menos intensidade ambiental para ver a cor real
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
             scene.add(ambientLight);
 
-            const spot1 = new THREE.PointLight(0xffffff, 1.2);
-            spot1.position.set(400, 600, 500);
-            scene.add(spot1);
+            // Luz direcional para destacar o 3D sem lavar
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(500, 500, 500);
+            scene.add(dirLight);
 
-            const rimLight = new THREE.PointLight(0x00E5FF, 1.5);
+            // Luz de Canto (Blue Rim) para o estilo Y2K
+            const rimLight = new THREE.PointLight(0x00E5FF, 1.2);
             rimLight.position.set(-600, -300, 400);
             scene.add(rimLight);
 
@@ -82,28 +88,17 @@
 
             animate();
             
-            // Aguarda um pouco para garantir que o tmi carregou se houver lag no CDN
             setTimeout(connectTwitch, 500);
-
-            // Mensagem de Inicialização
-            create3DMessage("SISTEMA", "Overlay Y2K ativado!");
+            create3DMessage("SISTEMA", "Overlay Glow Y2K ativo!");
         }
 
         function connectTwitch() {
-            if (typeof tmi === 'undefined') {
-                console.error("tmi.js não pôde ser carregado. Verifique a conexão.");
-                return;
-            }
-
+            if (typeof tmi === 'undefined') return;
             const client = new tmi.Client({
                 connection: { secure: true, reconnect: true },
                 channels: [TWITCH_CHANNEL]
             });
-
-            client.connect().then(() => {
-                console.log(`Conectado ao chat de ${TWITCH_CHANNEL}`);
-            }).catch(console.error);
-
+            client.connect().catch(console.error);
             client.on('message', (channel, tags, message, self) => {
                 if (self) return;
                 const user = tags['display-name'] || tags.username;
@@ -117,41 +112,40 @@
             canvas.width = 1024;
             canvas.height = 512;
 
-            // Fundo Laranja com gradiente plástico
-            const grad = ctx.createLinearGradient(0, 0, 0, 512);
-            grad.addColorStop(0, '#FF9100');
-            grad.addColorStop(1, '#FF5C00');
-            ctx.fillStyle = grad;
+            // Fundo Laranja Sólido (Mais Profundo)
+            ctx.fillStyle = '#FF5C00';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Reflexo Glossy Curvado
-            ctx.globalAlpha = 0.2;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.beginPath();
-            ctx.ellipse(512, 0, 1000, 300, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
+            // Gradiente para profundidade de cor (não estouro de luz)
+            const vGrad = ctx.createLinearGradient(0, 0, 0, 512);
+            vGrad.addColorStop(0, 'rgba(255,255,255,0.15)');
+            vGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+            ctx.fillStyle = vGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Username (Verde Ácido)
+            // Username com GLOW (emissão simulada na textura)
+            ctx.shadowColor = '#CCFF00';
+            ctx.shadowBlur = 15;
             ctx.font = 'bold 55px Fredoka One';
             ctx.fillStyle = '#CCFF00';
-            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-            ctx.lineWidth = 10;
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 12;
             ctx.strokeText(user.toUpperCase(), 60, 105);
             ctx.fillText(user.toUpperCase(), 60, 105);
+            ctx.shadowBlur = 0; // Reset shadow
 
-            // Texto da Mensagem (Branco Legível)
-            ctx.font = '70px Fredoka One';
+            // Mensagem
+            ctx.font = '72px Fredoka One';
             ctx.fillStyle = '#FFFFFF';
             const words = text.split(' ');
             let line = '';
-            let y = 230;
+            let y = 235;
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
                 if (ctx.measureText(testLine).width > 880 && n > 0) {
                     ctx.fillText(line, 60, y);
                     line = words[n] + ' ';
-                    y += 90;
+                    y += 100;
                     if (y > 450) break; 
                 } else {
                     line = testLine;
@@ -159,16 +153,13 @@
             }
             ctx.fillText(line, 60, y);
 
-            const tex = new THREE.CanvasTexture(canvas);
-            tex.anisotropy = 4;
-            return tex;
+            return new THREE.CanvasTexture(canvas);
         }
 
         function create3DMessage(user, text) {
-            // Tamanho Compacto
             const w = 340;
             const h = 135;
-            const radius = 35;
+            const radius = 40;
 
             const shape = new THREE.Shape();
             shape.moveTo(-w/2 + radius, -h/2);
@@ -189,17 +180,19 @@
                 bevelSegments: 6 
             });
 
+            // Material da Face (Emissivo para o Glow)
             const matFront = new THREE.MeshPhysicalMaterial({
                 map: createTextTexture(user, text),
-                roughness: 0.1,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.1,
-                reflectivity: 1.0
+                roughness: 0.15, // Aumentado para evitar reflexo estourado
+                clearcoat: 0.8,
+                reflectivity: 0.5,
+                emissive: COLORS.orange,
+                emissiveIntensity: 0.05 // Brilho interno sutil no laranja
             });
 
             const matSide = new THREE.MeshPhysicalMaterial({
                 color: COLORS.white,
-                roughness: 0.1,
+                roughness: 0.2,
                 clearcoat: 1.0
             });
 
@@ -207,17 +200,18 @@
             const group = new THREE.Group();
             group.add(mesh);
 
-            // Slime que Pinga de verdade
+            // Slime GLOW (Pingando com emissão alta)
             const slimes = [];
             for(let i = 0; i < 12; i++) {
                 const sGeo = new THREE.SphereGeometry(12 + Math.random() * 15, 16, 16);
                 const sMat = new THREE.MeshPhysicalMaterial({
                     color: COLORS.slime,
                     emissive: COLORS.slime,
-                    emissiveIntensity: 0.3,
+                    emissiveIntensity: 0.8, // GLOW forte no slime
                     transparent: true,
-                    opacity: 0.95,
-                    roughness: 0
+                    opacity: 0.9,
+                    roughness: 0,
+                    clearcoat: 1.0
                 });
                 const sMesh = new THREE.Mesh(sGeo, sMat);
                 const px = (Math.random() - 0.5) * (w + 20);
@@ -235,7 +229,6 @@
                 });
             }
 
-            // Início da animação: fora à esquerda
             group.position.set(-1500, CONFIG.offsetY, 0);
             group.scale.set(0.1, 0.1, 0.1);
             messagesGroup.add(group);
@@ -274,33 +267,27 @@
             const t = clock.getElapsedTime();
 
             activeBlocks.forEach((block, i) => {
-                // Movimento Flutuante "Lava Lamp"
                 const phase = t + i;
                 block.obj.rotation.x = Math.sin(phase * 0.9) * 0.1;
                 block.obj.rotation.y = Math.cos(phase * 0.7) * 0.12;
                 block.obj.rotation.z = Math.sin(phase * 0.3) * 0.04;
 
-                // Efeito Squash no bloco
                 const wave = Math.sin(t * 3.5 + block.seed);
                 block.obj.scale.y = 1 + wave * 0.025;
                 block.obj.scale.x = 1 - wave * 0.015;
 
-                // Lógica de PINGAR (Drip com Aceleração)
                 block.slimes.forEach(s => {
                     const localT = t * s.speed + s.offset;
-                    // Ciclo de queda (0 a 1) usando seno mapeado
                     let dripCycle = (Math.sin(localT) + 1) / 2;
-                    // Aceleração para parecer peso da gravidade
                     let dripFactor = Math.pow(dripCycle, 2.2); 
                     
-                    const stretch = 1 + (dripFactor * 6); // Esticamento intenso
-                    
-                    // Afina a gota enquanto estica
+                    const stretch = 1 + (dripFactor * 6); 
                     s.mesh.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch));
-                    // Posição cai conforme o esticamento
                     s.mesh.position.y = s.by - (dripFactor * s.dripLimit);
-                    // Balanço lateral das cordas de slime
                     s.mesh.position.x = s.bx + Math.sin(localT * 1.5) * 10;
+                    
+                    // Pulsação do Glow no Slime
+                    s.mesh.material.emissiveIntensity = 0.5 + (dripCycle * 0.8);
                 });
             });
 

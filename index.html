@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slime Eye Orbit Chat - Felipe Canneli</title>
+    <title>Slime 3D Pro Chat - Felipe Canneli</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Quicksand:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@700&display=swap');
 
         :root {
-            --slime-green: #9dff00;
-            --orange-candy: #ff9100;
-            --soft-white: #ffffff;
-            --glass-bg: rgba(255, 255, 255, 0.1);
+            --acid-green: #39ff14;
+            --acid-orange: #ff6600;
+            --bg-dark: #0a0a0a;
         }
 
         body {
@@ -19,215 +18,175 @@
             padding: 0;
             overflow: hidden;
             background: transparent !important;
-            font-family: 'Fredoka', sans-serif;
+            font-family: 'Archivo Black', sans-serif;
             height: 100vh;
-            width: 100vw;
+            /* Ativa o ambiente 3D */
+            perspective: 1000px;
         }
 
         /* Container do Chat */
         #chat-container {
             position: fixed;
-            bottom: 40px;
+            bottom: 50px;
             left: 50px;
-            width: 450px;
-            height: 85vh;
+            width: 500px;
+            height: 80vh;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             z-index: 10;
-            mask-image: linear-gradient(to top, black 85%, transparent 100%);
             pointer-events: none;
         }
 
-        /* Estrutura da Mensagem Slime */
+        /* Estrutura da Mensagem (Efeito Bloco 3D) */
         .chat-message {
             position: relative;
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 5px solid;
-            /* Gradiente animado na borda */
-            border-image: linear-gradient(var(--angle), var(--slime-green), var(--orange-candy), var(--slime-green)) 1;
-            padding: 22px;
-            margin-bottom: 40px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            
-            /* Animação de forma e flutuação */
-            border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
-            animation: 
-                slimeIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
-                morphing 5s ease-in-out infinite alternate,
-                floating 4s ease-in-out infinite,
-                rotateBorder 4s linear infinite;
-            
-            transform-origin: left bottom;
+            margin-bottom: 60px;
+            transform-style: preserve-3d;
+            animation: spawn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            filter: url('#gooey'); /* Aplica o efeito de slime nas bordas */
         }
 
-        @property --angle {
-            syntax: '<angle>';
-            initial-value: 0deg;
-            inherits: false;
+        /* O Bloco de Texto (Legibilidade Total) */
+        .message-body {
+            position: relative;
+            background: var(--bg-dark);
+            border: 4px solid var(--acid-green);
+            padding: 20px;
+            border-radius: 20px;
+            transform: translateZ(20px); /* Traz o texto para a frente */
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+            z-index: 5;
+            /* Animação de movimento de cores no fundo */
+            background: linear-gradient(135deg, #0a0a0a 0%, #151515 100%);
         }
 
-        @keyframes rotateBorder {
-            to { --angle: 360deg; }
+        /* Nome do Usuário */
+        .user-name {
+            display: block;
+            color: var(--acid-green);
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, var(--acid-green), var(--acid-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Elemento de Órbita dos Olhos */
-        .orbit-container {
+        /* Texto da Mensagem */
+        .message-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 22px;
+            color: #ffffff;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+
+        /* Olhos Orbitantes */
+        .orbit-eye {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 120%;
-            height: 120%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .eye-orbiter {
-            position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(255,255,255,0.8);
-            animation: orbit 6s linear infinite;
+            box-shadow: 0 0 20px white;
+            z-index: 10;
+            /* Orbitando em 3D */
+            animation: orbit3d 6s linear infinite;
         }
 
-        .eye-orbiter::after {
+        .orbit-eye::after {
             content: "";
-            width: 12px;
-            height: 12px;
-            background: #000;
+            width: 15px;
+            height: 15px;
+            background: black;
             border-radius: 50%;
-            /* Pupila se movendo */
-            animation: lookAround 2s infinite ease-in-out;
+            animation: pupilMove 2s infinite ease-in-out;
         }
 
-        /* Estilos diferentes para os olhos orbitais */
-        .eye-1 { animation-duration: 5s; }
-        .eye-2 { animation-duration: 8s; animation-delay: -2s; }
-
-        @keyframes orbit {
-            from { transform: rotate(0deg) translateX(180px) rotate(0deg); }
-            to { transform: rotate(360deg) translateX(180px) rotate(-360deg); }
+        /* Segundo olho */
+        .eye-2 {
+            animation-duration: 4.5s;
+            animation-delay: -2s;
+            scale: 0.7;
         }
 
-        @keyframes lookAround {
+        /* --- ANIMAÇÕES --- */
+
+        @keyframes spawn {
+            0% { opacity: 0; transform: scale(0.5) translateZ(-200px) rotateX(-45deg); }
+            100% { opacity: 1; transform: scale(1) translateZ(0) rotateX(10deg); }
+        }
+
+        @keyframes orbit3d {
+            0% { transform: translate(-50%, -50%) rotateY(0deg) translateX(220px) rotateY(0deg); }
+            100% { transform: translate(-50%, -50%) rotateY(360deg) translateX(220px) rotateY(-360deg); }
+        }
+
+        @keyframes pupilMove {
             0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(4px, -2px); }
-            75% { transform: translate(-4px, 2px); }
-        }
-
-        /* Nome do Usuário */
-        .user-wrapper {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .user-name {
-            background: linear-gradient(90deg, #fff, var(--slime-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-
-        /* Texto da Mensagem */
-        .message-text {
-            font-family: 'Quicksand', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            line-height: 1.3;
-            word-wrap: break-word;
-            color: #111; /* Texto escuro para contraste no slime claro */
-            background: rgba(255,255,255,0.4);
-            padding: 5px 10px;
-            border-radius: 10px;
-        }
-
-        /* Animações de Movimento Slime */
-        @keyframes slimeIn {
-            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(1deg); }
-        }
-
-        @keyframes morphing {
-            0% { border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%; }
-            50% { border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%; }
-            100% { border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%; }
+            25% { transform: translate(5px, -3px); }
+            75% { transform: translate(-5px, 3px); }
         }
 
         .fade-out {
-            animation: slimeOut 0.5s ease-in forwards;
+            animation: fadeOut 0.5s forwards;
         }
 
-        @keyframes slimeOut {
-            to { opacity: 0; transform: scale(0.8) translateY(-40px); filter: blur(10px); }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(0.8) translateY(-50px); filter: blur(20px); }
         }
 
-        /* Status inferior */
-        #chat-status {
-            position: fixed;
-            bottom: 15px;
-            left: 30px;
-            font-family: 'Fredoka', sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--slime-green);
-            z-index: 11;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(0,0,0,0.3);
-            padding: 8px 18px;
-            border-radius: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .status-eye {
-            width: 14px;
-            height: 14px;
-            background: white;
-            border-radius: 50%;
-            position: relative;
-        }
-
-        .status-eye::after {
-            content: "";
+        /* Efeito de cores escorrendo na borda */
+        .border-glow {
             position: absolute;
-            top: 50%; left: 50%;
-            width: 6px; height: 6px;
-            background: black;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation: lookAround 1s infinite alternate;
+            inset: -5px;
+            background: linear-gradient(90deg, var(--acid-green), var(--acid-orange), var(--acid-green));
+            background-size: 200% 200%;
+            border-radius: 25px;
+            z-index: -1;
+            animation: flowColors 3s linear infinite;
+        }
+
+        @keyframes flowColors {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        #status {
+            position: fixed;
+            bottom: 20px;
+            left: 50px;
+            font-size: 10px;
+            color: var(--acid-green);
+            background: rgba(0,0,0,0.8);
+            padding: 4px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--acid-green);
         }
     </style>
 </head>
 <body>
 
+    <!-- Filtro SVG para efeito Slime/Gooey -->
+    <svg style="visibility: hidden; position: absolute;" width="0" height="0">
+        <defs>
+            <filter id="gooey">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+            </filter>
+        </defs>
+    </svg>
+
     <div id="chat-container"></div>
-    
-    <div id="chat-status">
-        <div class="status-eye"></div>
-        <span>EYE_STREAM // SLIME_ORBIT // FELIPECANNELI</span>
-    </div>
+    <div id="status">SISTEMA BIO-SLIME // ONLINE</div>
 
     <script>
         const channel = 'felipecanneli';
@@ -241,7 +200,8 @@
                 socket.send('NICK justinfan' + Math.floor(Math.random() * 10000));
                 socket.send('JOIN #' + channel);
                 
-                setTimeout(() => addChatMessage("EYE_BOT", "ESTOU DE OLHO EM TUDO... 👀"), 500);
+                // Mensagem de teste para ver se está a funcionar
+                setTimeout(() => addChatMessage("SLIME_OS", "SISTEMA CARREGADO COM SUCESSO. 🟢🟠"), 500);
             };
 
             socket.onmessage = (event) => {
@@ -258,9 +218,7 @@
                 }
             };
 
-            socket.onclose = () => {
-                setTimeout(connectTwitchChat, 3000);
-            };
+            socket.onclose = () => setTimeout(connectTwitchChat, 3000);
         }
 
         function addChatMessage(user, message) {
@@ -268,32 +226,31 @@
             msgDiv.className = 'chat-message';
 
             msgDiv.innerHTML = `
-                <div class="orbit-container">
-                    <div class="eye-orbiter eye-1"></div>
-                    <div class="eye-orbiter eye-2"></div>
-                </div>
-                <div class="user-wrapper">
+                <div class="border-glow"></div>
+                <div class="orbit-eye"></div>
+                <div class="orbit-eye eye-2"></div>
+                <div class="message-body">
                     <span class="user-name">${user}</span>
+                    <span class="message-text">${message}</span>
                 </div>
-                <span class="message-text">${message}</span>
             `;
             
             chatContainer.appendChild(msgDiv);
 
-            // Controle de quantidade para não sobrecarregar
+            // Mantém apenas as últimas 5 mensagens
             if (chatContainer.childNodes.length > 5) {
                 const first = chatContainer.firstChild;
                 first.classList.add('fade-out');
-                setTimeout(() => first.remove(), 500);
+                setTimeout(() => first.remove(), 600);
             }
 
-            // Auto-remover
+            // Auto-remover após 25 segundos
             setTimeout(() => {
                 if (msgDiv.parentNode) {
                     msgDiv.classList.add('fade-out');
-                    setTimeout(() => msgDiv.remove(), 500);
+                    setTimeout(() => msgDiv.remove(), 600);
                 }
-            }, 20000);
+            }, 25000);
         }
 
         window.onload = connectTwitchChat;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overlay Chat 3D - felipecanneli</title>
+    <title>Overlay Chat 3D Illuminati - felipecanneli</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
         
@@ -21,7 +21,6 @@
             background: transparent;
         }
     </style>
-    <!-- Bibliotecas essenciais com CDNs estáveis -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tmi.js@1.8.5/dist/tmi.min.js"></script>
@@ -31,7 +30,7 @@
 
     <script>
         /**
-         * CONFIGURAÇÕES TÉCNICAS E ESTÉTICAS Y2K - GLOW & VIBRANTE
+         * CONFIGURAÇÕES ILLUMINATI NICK - felipecanneli
          */
         const TWITCH_CHANNEL = 'felipecanneli';
         
@@ -39,16 +38,16 @@
             orange: new THREE.Color(0xFF5C00),
             white: new THREE.Color(0xFFFFFF),
             slime: new THREE.Color(0xCCFF00),
+            pink: new THREE.Color(0xFF00FF),
             blue: new THREE.Color(0x00E5FF),
-            black: new THREE.Color(0x000000)
         };
 
         const CONFIG = {
-            depth: 50,
-            blockGap: 180, 
+            depth: 60,
+            blockGap: 210, 
             maxMessages: 5,
             offsetX: -420, 
-            offsetY: -420,
+            offsetY: -450,
         };
 
         let scene, camera, renderer, clock;
@@ -58,59 +57,43 @@
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 5000);
-            camera.position.set(0, 0, 1200);
+            camera.position.set(0, 0, 1300);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             
-            // Controle de exposição para cores saturadas sem estourar
+            // Ativa tompping para cores vibrantes
             renderer.toneMapping = THREE.LinearToneMapping;
-            renderer.toneMappingExposure = 1.0;
+            renderer.toneMappingExposure = 1.2;
             
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Iluminação balanceada para destacar o texto
+            // Luzes
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(200, 500, 500);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight.position.set(300, 600, 500);
             scene.add(dirLight);
-
-            const rimLight = new THREE.PointLight(0x00E5FF, 1.0);
-            rimLight.position.set(-600, -300, 400);
-            scene.add(rimLight);
 
             scene.add(messagesGroup);
             clock = new THREE.Clock();
 
             animate();
-            
-            // Iniciar conexão Twitch
-            setTimeout(connectTwitch, 800);
+            setTimeout(connectTwitch, 1000);
 
-            // Mensagens iniciais de teste (Aparecem logo ao abrir)
-            create3DMessage("SISTEMA", "Overlay 3D Conectado!");
-            create3DMessage("CANAL", "felipecanneli está ON.");
+            // Mensagem de Teste Inicial
+            create3DMessage("ILLUMINATI", "O OLHO QUE TUDO VÊ NO CHAT.");
         }
 
         function connectTwitch() {
-            if (typeof tmi === 'undefined') {
-                console.warn("TMI não definido, tentando reconectar...");
-                setTimeout(connectTwitch, 2000);
-                return;
-            }
-
-            const client = new tmi.Client({
+            if (typeof tmi === 'undefined') return;
+            const client = new tmi.Client({ 
                 connection: { secure: true, reconnect: true },
-                channels: [TWITCH_CHANNEL]
+                channels: [TWITCH_CHANNEL] 
             });
-
-            client.connect().then(() => {
-                console.log("Conectado à Twitch com sucesso!");
-            }).catch(err => console.error("Erro Twitch:", err));
-
+            client.connect().catch(console.error);
             client.on('message', (channel, tags, message, self) => {
                 if (self) return;
                 const user = tags['display-name'] || tags.username;
@@ -118,71 +101,103 @@
             });
         }
 
+        function createCheckerTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0,0,128,128);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0,0,64,64);
+            ctx.fillRect(64,64,64,64);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.repeat.set(2, 0.5);
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            return tex;
+        }
+
         function createTextTexture(user, text) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 1024;
-            canvas.height = 512;
+            canvas.width = 1024; canvas.height = 512;
 
-            // Fundo Laranja Vibrante
+            // Fundo Laranja Nick Puro
             ctx.fillStyle = '#FF5C00';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Sombreamento interno para profundidade
-            const grad = ctx.createLinearGradient(0, 0, 0, 512);
-            grad.addColorStop(0, 'rgba(255,255,255,0.2)');
-            grad.addColorStop(0.5, 'rgba(255,255,255,0)');
-            grad.addColorStop(1, 'rgba(0,0,0,0.3)');
+            // Efeito Brilho Y2K Superior
+            const grad = ctx.createLinearGradient(0,0,0,512);
+            grad.addColorStop(0, 'rgba(255,255,255,0.4)');
+            grad.addColorStop(0.4, 'rgba(255,255,255,0)');
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0,0,1024,512);
 
-            // Nome do Usuário com Glow Neon
-            ctx.font = 'bold 60px Fredoka One';
+            // Username (Glow Verde Neon)
             ctx.shadowColor = '#CCFF00';
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 25;
+            ctx.font = 'bold 70px Fredoka One';
             ctx.fillStyle = '#CCFF00';
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 14;
-            ctx.strokeText(user.toUpperCase(), 60, 110);
-            ctx.fillText(user.toUpperCase(), 60, 110);
+            ctx.lineWidth = 15;
+            ctx.strokeText(user.toUpperCase(), 60, 120);
+            ctx.fillText(user.toUpperCase(), 60, 120);
             
-            // Reset do shadow para a mensagem
+            // Mensagem (Branca Ultra Legível)
             ctx.shadowBlur = 0;
-
-            // Mensagem do Chat (Branco Puro com borda para legibilidade)
-            ctx.font = '75px Fredoka One';
+            ctx.font = '85px Fredoka One';
             ctx.fillStyle = '#FFFFFF';
-            ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-            ctx.lineWidth = 6;
-            
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 8;
+
             const words = text.split(' ');
-            let line = '';
-            let y = 245;
+            let line = ''; let y = 260;
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
-                if (ctx.measureText(testLine).width > 880 && n > 0) {
+                if (ctx.measureText(testLine).width > 850 && n > 0) {
                     ctx.strokeText(line, 60, y);
                     ctx.fillText(line, 60, y);
                     line = words[n] + ' ';
-                    y += 100;
-                    if (y > 480) break; // Limite de altura
-                } else {
-                    line = testLine;
-                }
+                    y += 110;
+                    if (y > 480) break;
+                } else { line = testLine; }
             }
             ctx.strokeText(line, 60, y);
             ctx.fillText(line, 60, y);
 
             const tex = new THREE.CanvasTexture(canvas);
-            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            tex.needsUpdate = true;
             return tex;
         }
 
-        function create3DMessage(user, text) {
-            const w = 360;
-            const h = 150;
-            const radius = 45;
+        function createEye() {
+            const eyeGroup = new THREE.Group();
+            const eyeball = new THREE.Mesh(
+                new THREE.SphereGeometry(25, 32, 32),
+                new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.1, clearcoat: 1.0 })
+            );
+            eyeGroup.add(eyeball);
 
+            const iris = new THREE.Mesh(
+                new THREE.SphereGeometry(14, 32, 32),
+                new THREE.MeshBasicMaterial({ color: 0xFF00FF }) // Rosa Illuminati
+            );
+            iris.position.z = 18;
+            iris.scale.z = 0.5;
+            eyeGroup.add(iris);
+
+            const pupil = new THREE.Mesh(
+                new THREE.SphereGeometry(7, 32, 32),
+                new THREE.MeshBasicMaterial({ color: 0x000000 })
+            );
+            pupil.position.z = 24;
+            pupil.scale.z = 0.4;
+            eyeGroup.add(pupil);
+
+            return eyeGroup;
+        }
+
+        function create3DMessage(user, text) {
+            const w = 380, h = 160, radius = 50;
             const shape = new THREE.Shape();
             shape.moveTo(-w/2 + radius, -h/2);
             shape.lineTo(w/2 - radius, -h/2);
@@ -195,81 +210,77 @@
             shape.quadraticCurveTo(-w/2, -h/2, -w/2 + radius, -h/2);
 
             const geometry = new THREE.ExtrudeGeometry(shape, { 
-                depth: CONFIG.depth, 
-                bevelEnabled: true, 
-                bevelThickness: 12, 
-                bevelSize: 10, 
-                bevelSegments: 8 
+                depth: CONFIG.depth, bevelEnabled: true, bevelThickness: 15, bevelSize: 12, bevelSegments: 10 
             });
 
-            // Materiais: 0 é frente/trás, 1 é lateral
-            const texture = createTextTexture(user, text);
-            const matFront = new THREE.MeshPhysicalMaterial({
-                map: texture,
-                roughness: 0.2,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.1,
-                reflectivity: 1.0,
-                emissive: COLORS.orange,
-                emissiveIntensity: 0.05
+            // Material da Face (Auto-iluminado para garantir que o texto apareça)
+            const matFront = new THREE.MeshBasicMaterial({ 
+                map: createTextTexture(user, text),
+                transparent: false
             });
 
-            const matSide = new THREE.MeshPhysicalMaterial({
-                color: COLORS.white,
-                roughness: 0.1,
-                clearcoat: 1.0
+            // LATERAIS QUADRICULADAS COM GLOW NEON NAS BORDAS
+            const matSide = new THREE.MeshPhysicalMaterial({ 
+                map: createCheckerTexture(), 
+                color: 0xffffff, 
+                emissive: 0xffffff,
+                emissiveIntensity: 0.4, // Glow nas partes brancas do xadrez
+                roughness: 0.1, 
+                clearcoat: 1.0 
             });
 
             const mesh = new THREE.Mesh(geometry, [matFront, matSide]);
             const group = new THREE.Group();
             group.add(mesh);
 
-            // Slime que Pinga com Glow
-            const slimes = [];
-            for(let i = 0; i < 14; i++) {
-                const sGeo = new THREE.SphereGeometry(14 + Math.random() * 18, 16, 16);
-                const sMat = new THREE.MeshPhysicalMaterial({
-                    color: COLORS.slime,
-                    emissive: COLORS.slime,
-                    emissiveIntensity: 0.6,
-                    transparent: true,
-                    opacity: 0.95,
-                    roughness: 0,
-                    clearcoat: 1.0
-                });
-                const sMesh = new THREE.Mesh(sGeo, sMat);
-                const px = (Math.random() - 0.5) * (w + 20);
-                const pz = Math.random() * CONFIG.depth;
-                sMesh.position.set(px, -h/2, pz);
-                group.add(sMesh);
-                
-                slimes.push({ 
-                    mesh: sMesh, 
-                    speed: 1.5 + Math.random() * 2, 
-                    offset: Math.random() * 10, 
-                    bx: px,
-                    by: -h/2,
-                    dripLimit: 100 + Math.random() * 150 
+            // Olhos Illuminati
+            const eyes = [];
+            for(let i = 0; i < 3; i++) {
+                const eye = createEye();
+                group.add(eye);
+                eyes.push({
+                    mesh: eye,
+                    angle: (i / 3) * Math.PI * 2,
+                    speed: 1.5 + Math.random() * 1.5,
+                    radius: 320 + Math.random() * 60,
+                    offsetY: (Math.random() - 0.5) * 120
                 });
             }
 
-            // Inicia fora da tela
+            // Slime GOSMENTO que pinga
+            const slimes = [];
+            for(let i = 0; i < 15; i++) {
+                const sGeo = new THREE.SphereGeometry(15 + Math.random() * 20, 16, 16);
+                const sMat = new THREE.MeshPhysicalMaterial({ 
+                    color: COLORS.slime, 
+                    emissive: COLORS.slime, 
+                    emissiveIntensity: 0.8, // Glow verde neon forte
+                    transparent: true, 
+                    opacity: 0.95 
+                });
+                const sMesh = new THREE.Mesh(sGeo, sMat);
+                const px = (Math.random() - 0.5) * (w + 40);
+                sMesh.position.set(px, -h/2, Math.random() * CONFIG.depth);
+                group.add(sMesh);
+                slimes.push({ 
+                    mesh: sMesh, speed: 1.5 + Math.random() * 2, offset: Math.random() * 10, 
+                    bx: px, by: -h/2, dripLimit: 140 + Math.random() * 120 
+                });
+            }
+
             group.position.set(-1500, CONFIG.offsetY, 0);
             group.scale.set(0.1, 0.1, 0.1);
             messagesGroup.add(group);
             
-            activeBlocks.push({ obj: group, slimes, seed: Math.random() * 100 });
+            activeBlocks.push({ obj: group, slimes, eyes, seed: Math.random() * 100 });
 
-            gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: "back.out(1.7)" });
+            gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "elastic.out(1, 0.5)" });
 
             if (activeBlocks.length > CONFIG.maxMessages) {
                 const old = activeBlocks.shift();
                 gsap.to(old.obj.scale, { x: 0, y: 0, z: 0, duration: 0.5, onComplete: () => {
                     messagesGroup.remove(old.obj);
-                    old.obj.traverse(n => {
-                        if (n.geometry) n.geometry.dispose();
-                        if (n.material) (Array.isArray(n.material) ? n.material : [n.material]).forEach(m => m.dispose());
-                    });
+                    old.obj.traverse(n => { if (n.geometry) n.geometry.dispose(); });
                 }});
             }
             updateStack();
@@ -284,6 +295,12 @@
                     duration: 1.2,
                     ease: "elastic.out(1, 0.8)"
                 });
+                
+                // Olhos somem conforme a mensagem sobe
+                const eyeScale = Math.max(0, 1 - (rev * 0.3)); 
+                block.eyes.forEach(e => {
+                    gsap.to(e.mesh.scale, { x: eyeScale, y: eyeScale, z: eyeScale, duration: 1 });
+                });
             });
         }
 
@@ -293,26 +310,27 @@
 
             activeBlocks.forEach((block, i) => {
                 const phase = t + i;
-                // Movimento "Gelatina" 3D
-                block.obj.rotation.x = Math.sin(phase * 0.8) * 0.12;
-                block.obj.rotation.y = Math.cos(phase * 0.6) * 0.15;
-                block.obj.rotation.z = Math.sin(phase * 0.3) * 0.05;
+                block.obj.rotation.x = Math.sin(phase * 0.7) * 0.15;
+                block.obj.rotation.y = Math.cos(phase * 0.5) * 0.15;
 
-                const wobble = Math.sin(t * 3.0 + block.seed);
-                block.obj.scale.y = 1 + wobble * 0.03;
+                // Orbitar Olhos
+                block.eyes.forEach(e => {
+                    const orbitAngle = t * e.speed + e.angle;
+                    e.mesh.position.x = Math.cos(orbitAngle) * e.radius;
+                    e.mesh.position.z = Math.sin(orbitAngle) * e.radius;
+                    e.mesh.position.y = Math.sin(t * 2.5 + e.angle) * 40 + e.offsetY;
+                    e.mesh.lookAt(0, 0, 0); // Focam no centro do bloco
+                });
 
-                // Animação de PINGAR (Drip)
+                // Slime Drip (Pinga de verdade com aceleração)
                 block.slimes.forEach(s => {
                     const localT = t * s.speed + s.offset;
                     let dripCycle = (Math.sin(localT) + 1) / 2;
-                    let dripFactor = Math.pow(dripCycle, 2.0); 
-                    
-                    const stretch = 1 + (dripFactor * 6.5); 
+                    let dripFactor = Math.pow(dripCycle, 2.5); // Mais tempo em cima, cai rápido
+                    const stretch = 1 + (dripFactor * 8.0); 
                     s.mesh.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch));
                     s.mesh.position.y = s.by - (dripFactor * s.dripLimit);
-                    s.mesh.position.x = s.bx + Math.sin(localT * 1.5) * 10;
-                    
-                    s.mesh.material.emissiveIntensity = 0.4 + (dripCycle * 0.8);
+                    s.mesh.material.emissiveIntensity = 0.5 + (dripCycle * 1.0);
                 });
             });
 

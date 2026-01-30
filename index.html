@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +31,7 @@
 
     <script>
         /**
-         * CONFIGURAÇÕES TÉCNICAS E ESTÉTICAS
+         * CONFIGURAÇÕES TÉCNICAS E ESTÉTICAS - felipecanneli
          */
         const TWITCH_CHANNEL = 'felipecanneli';
         
@@ -39,16 +39,15 @@
             orange: new THREE.Color(0xFF5C00), 
             white: new THREE.Color(0xFFFFFF),
             slime: new THREE.Color(0xCCFF00), 
-            pink: new THREE.Color(0xFF00FF),
             blue: new THREE.Color(0x00E5FF),
         };
 
         const CONFIG = {
-            depth: 65,
+            depth: 60,
             blockGap: 210, 
             maxMessages: 5,
-            offsetX: -420, 
-            offsetY: -450,
+            offsetX: -420, // Distância da margem esquerda
+            offsetY: -450, // Posição vertical da base
         };
 
         let scene, camera, renderer, clock;
@@ -63,13 +62,12 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            
             renderer.toneMapping = THREE.LinearToneMapping;
-            renderer.toneMappingExposure = 1.2;
+            renderer.toneMappingExposure = 1.1;
             
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Iluminação Estúdio de Brinquedo
+            // Iluminação Estilo Estúdio de Brinquedos
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
@@ -77,22 +75,25 @@
             dirLight.position.set(300, 600, 500);
             scene.add(dirLight);
 
-            const pointLight = new THREE.PointLight(COLORS.blue, 0.8);
-            pointLight.position.set(-600, 200, 400);
-            scene.add(pointLight);
+            const fillLight = new THREE.PointLight(COLORS.blue, 0.5);
+            fillLight.position.set(-600, 200, 400);
+            scene.add(fillLight);
 
             scene.add(messagesGroup);
             clock = new THREE.Clock();
 
             animate();
             
-            // Inicia conexão Twitch sem mensagens de prévia
-            checkTmiAndConnect();
-            
-            // Evento para você testar clicando na tela (apenas localmente)
+            // Garantir que as fontes estão carregadas antes de criar a primeira textura
+            document.fonts.ready.then(() => {
+                checkTmiAndConnect();
+                // Mensagem Inicial para confirmar que está a funcionar
+                create3DMessage("SISTEMA", "OVERLAY CARREGADO! À ESPERA DO CHAT...");
+            });
+
+            // Clique para teste manual (útil para verificar se o 3D aparece)
             window.addEventListener('mousedown', () => {
-                console.log("Teste manual disparado");
-                create3DMessage("VOCÊ", "Isso é um teste do chat candy!");
+                create3DMessage("TESTE", "Isto é um teste super candy!");
             });
         }
 
@@ -110,9 +111,7 @@
                 connection: { secure: true, reconnect: true },
                 channels: [TWITCH_CHANNEL] 
             });
-            client.connect().then(() => {
-                console.log(`Conectado com sucesso ao canal: ${TWITCH_CHANNEL}`);
-            }).catch(console.error);
+            client.connect().catch(console.error);
 
             client.on('message', (channel, tags, message, self) => {
                 if (self) return;
@@ -131,10 +130,10 @@
             // Nome do Usuário (Luckiest Guy)
             ctx.font = 'bold 80px "Luckiest Guy"';
             ctx.shadowColor = '#CCFF00';
-            ctx.shadowBlur = 30;
+            ctx.shadowBlur = 25;
             ctx.fillStyle = '#CCFF00';
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 18;
+            ctx.lineWidth = 16;
             ctx.strokeText(user.toUpperCase(), 60, 130);
             ctx.fillText(user.toUpperCase(), 60, 130);
             
@@ -143,13 +142,13 @@
             ctx.font = 'bold 85px "Fredoka"';
             ctx.fillStyle = '#FFFFFF';
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 12;
+            ctx.lineWidth = 10;
 
             const words = text.split(' ');
             let line = ''; let y = 260;
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
-                if (ctx.measureText(testLine).width > 850 && n > 0) {
+                if (ctx.measureText(testLine).width > 880 && n > 0) {
                     ctx.strokeText(line, 60, y);
                     ctx.fillText(line, 60, y);
                     line = words[n] + ' ';
@@ -160,11 +159,13 @@
             ctx.strokeText(line, 60, y);
             ctx.fillText(line, 60, y);
 
-            return new THREE.CanvasTexture(canvas);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.needsUpdate = true;
+            return tex;
         }
 
         function create3DMessage(user, text) {
-            const w = 380, h = 160, radius = 55;
+            const w = 400, h = 160, radius = 55;
             const shape = new THREE.Shape();
             shape.moveTo(-w/2 + radius, -h/2);
             shape.lineTo(w/2 - radius, -h/2);
@@ -177,10 +178,10 @@
             shape.quadraticCurveTo(-w/2, -h/2, -w/2 + radius, -h/2);
 
             const geometry = new THREE.ExtrudeGeometry(shape, { 
-                depth: CONFIG.depth, bevelEnabled: true, bevelThickness: 18, bevelSize: 15, bevelSegments: 12 
+                depth: CONFIG.depth, bevelEnabled: true, bevelThickness: 15, bevelSize: 12, bevelSegments: 10 
             });
 
-            // Materiais Plástico Glossy
+            // Materiais Plástico Glossy Estilo Nick
             const matOrange = new THREE.MeshPhysicalMaterial({ 
                 color: COLORS.orange, roughness: 0.1, clearcoat: 1.0, reflectivity: 1.0,
                 emissive: COLORS.orange, emissiveIntensity: 0.05 
@@ -195,15 +196,15 @@
             const group = new THREE.Group();
             group.add(mesh);
 
-            // Camada de Texto
+            // CAMADA DE TEXTO (Plano separado para evitar erros de render)
             const textPlaneMat = new THREE.MeshBasicMaterial({ 
                 map: createTextTexture(user, text), transparent: true 
             });
             const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), textPlaneMat);
-            textMesh.position.z = CONFIG.depth + 20;
+            textMesh.position.z = CONFIG.depth + 18; // À frente do bloco
             group.add(textMesh);
 
-            // Slime GOSMENTO (Pinga com física)
+            // Slime GOSMENTO (Mais gotas e mais elásticas)
             const slimes = [];
             for(let i = 0; i < 12; i++) {
                 const sMesh = new THREE.Mesh(
@@ -213,22 +214,22 @@
                         transparent: true, opacity: 0.95, clearcoat: 1.0
                     })
                 );
-                const px = (Math.random() - 0.5) * (w + 60);
+                const px = (Math.random() - 0.5) * (w + 40);
                 sMesh.position.set(px, -h/2, Math.random() * CONFIG.depth);
                 group.add(sMesh);
                 slimes.push({ 
                     mesh: sMesh, speed: 1.5 + Math.random() * 2.0, offset: Math.random() * 10, 
-                    bx: px, by: -h/2, dripLimit: 140 + Math.random() * 140 
+                    bx: px, by: -h/2, dripLimit: 140 + Math.random() * 150 
                 });
             }
 
-            // Animação de Entrada
+            // Animação de Entrada GSAP (Vem do fundo/esquerda e cresce)
             group.position.set(-1500, CONFIG.offsetY, 0);
             group.scale.set(0.01, 0.01, 0.01);
             messagesGroup.add(group);
             
             activeBlocks.push({ obj: group, slimes, seed: Math.random() * 100 });
-            gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: "back.out(1.7)" });
+            gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "back.out(1.7)" });
 
             if (activeBlocks.length > CONFIG.maxMessages) {
                 const old = activeBlocks.shift();
@@ -242,6 +243,7 @@
         function updateStack() {
             activeBlocks.forEach((block, index) => {
                 const rev = activeBlocks.length - 1 - index;
+                // Posicionamento X e Y dinâmico (sobe conforme novos chegam)
                 gsap.to(block.obj.position, {
                     x: CONFIG.offsetX, 
                     y: (rev * CONFIG.blockGap) + CONFIG.offsetY,
@@ -257,12 +259,14 @@
 
             activeBlocks.forEach((block, i) => {
                 const phase = t + i;
-                block.obj.rotation.x = Math.sin(phase * 0.7) * 0.1;
-                block.obj.rotation.y = Math.cos(phase * 0.5) * 0.12;
+                // Flutuação Y2K
+                block.obj.rotation.x = Math.sin(phase * 0.7) * 0.08;
+                block.obj.rotation.y = Math.cos(phase * 0.5) * 0.1;
 
                 const wobble = Math.sin(t * 3.5 + block.seed);
-                block.obj.scale.y = 1 + wobble * 0.035;
+                block.obj.scale.y = 1 + wobble * 0.03;
 
+                // Slime a pingar com gravidade
                 block.slimes.forEach(s => {
                     const localT = t * s.speed + s.offset;
                     let dripCycle = (Math.sin(localT) + 1) / 2;

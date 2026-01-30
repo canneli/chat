@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overlay Chat 3D Illuminati - felipecanneli</title>
+    <title>Overlay Chat 3D Candy - felipecanneli</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+        /* Fontes Candy/Toy Estilo Nickelodeon */
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@700&display=swap');
         
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
             background-color: transparent !important;
-            font-family: 'Fredoka One', cursive;
+            font-family: 'Fredoka', sans-serif;
         }
 
         #canvas-container {
@@ -30,22 +31,21 @@
 
     <script>
         /**
-         * CONFIGURAÇÕES ILLUMINATI NICK - felipecanneli
+         * CONFIGURAÇÕES TÉCNICAS E ESTÉTICAS
          */
         const TWITCH_CHANNEL = 'felipecanneli';
         
         const COLORS = {
-            orange: 0xFF5C00,
-            white: 0xFFFFFF,
-            slime: 0xCCFF00,
-            pink: 0xFF00FF,
-            blue: 0x00E5FF,
-            black: 0x000000
+            orange: new THREE.Color(0xFF5C00), 
+            white: new THREE.Color(0xFFFFFF),
+            slime: new THREE.Color(0xCCFF00), 
+            pink: new THREE.Color(0xFF00FF),
+            blue: new THREE.Color(0x00E5FF),
         };
 
         const CONFIG = {
-            depth: 60,
-            blockGap: 220, 
+            depth: 65,
+            blockGap: 210, 
             maxMessages: 5,
             offsetX: -420, 
             offsetY: -450,
@@ -63,11 +63,13 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
             renderer.toneMapping = THREE.LinearToneMapping;
-            renderer.toneMappingExposure = 1.1;
+            renderer.toneMappingExposure = 1.2;
             
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
+            // Iluminação Estúdio de Brinquedo
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
@@ -75,17 +77,23 @@
             dirLight.position.set(300, 600, 500);
             scene.add(dirLight);
 
+            const pointLight = new THREE.PointLight(COLORS.blue, 0.8);
+            pointLight.position.set(-600, 200, 400);
+            scene.add(pointLight);
+
             scene.add(messagesGroup);
             clock = new THREE.Clock();
 
             animate();
             
-            // Iniciar Verificação e Conexão
+            // Inicia conexão Twitch sem mensagens de prévia
             checkTmiAndConnect();
-
-            // Mensagens de Boas-vindas para testar o sistema de texto
-            setTimeout(() => create3DMessage("SYSTEM", "PROTOCOLO ATIVADO"), 500);
-            setTimeout(() => create3DMessage("ILLUMINATI", "OLHO ABERTO"), 1500);
+            
+            // Evento para você testar clicando na tela (apenas localmente)
+            window.addEventListener('mousedown', () => {
+                console.log("Teste manual disparado");
+                create3DMessage("VOCÊ", "Isso é um teste do chat candy!");
+            });
         }
 
         function checkTmiAndConnect() {
@@ -102,7 +110,10 @@
                 connection: { secure: true, reconnect: true },
                 channels: [TWITCH_CHANNEL] 
             });
-            client.connect().catch(console.error);
+            client.connect().then(() => {
+                console.log(`Conectado com sucesso ao canal: ${TWITCH_CHANNEL}`);
+            }).catch(console.error);
+
             client.on('message', (channel, tags, message, self) => {
                 if (self) return;
                 const user = tags['display-name'] || tags.username;
@@ -110,55 +121,39 @@
             });
         }
 
-        function createCheckerTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 128; canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0,0,128,128);
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0,0,64,64);
-            ctx.fillRect(64,64,64,64);
-            const tex = new THREE.CanvasTexture(canvas);
-            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(2, 1);
-            return tex;
-        }
-
         function createTextTexture(user, text) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 1024; canvas.height = 512;
 
-            // Fundo transparente (o plano ficará sobre o bloco laranja)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Username com Glow Neon Verde
+            // Nome do Usuário (Luckiest Guy)
+            ctx.font = 'bold 80px "Luckiest Guy"';
             ctx.shadowColor = '#CCFF00';
-            ctx.shadowBlur = 25;
-            ctx.font = 'bold 75px Fredoka One';
+            ctx.shadowBlur = 30;
             ctx.fillStyle = '#CCFF00';
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 15;
-            ctx.strokeText(user.toUpperCase(), 60, 120);
-            ctx.fillText(user.toUpperCase(), 60, 120);
+            ctx.lineWidth = 18;
+            ctx.strokeText(user.toUpperCase(), 60, 130);
+            ctx.fillText(user.toUpperCase(), 60, 130);
             
-            // Mensagem (Branca Ultra Legível)
+            // Texto da Mensagem (Fredoka)
             ctx.shadowBlur = 0;
-            ctx.font = 'bold 85px Fredoka One';
+            ctx.font = 'bold 85px "Fredoka"';
             ctx.fillStyle = '#FFFFFF';
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 10;
+            ctx.lineWidth = 12;
 
             const words = text.split(' ');
-            let line = ''; let y = 250;
+            let line = ''; let y = 260;
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
                 if (ctx.measureText(testLine).width > 850 && n > 0) {
                     ctx.strokeText(line, 60, y);
                     ctx.fillText(line, 60, y);
                     line = words[n] + ' ';
-                    y += 105;
+                    y += 110;
                     if (y > 480) break;
                 } else { line = testLine; }
             }
@@ -168,30 +163,8 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        function createEye() {
-            const group = new THREE.Group();
-            const eyeball = new THREE.Mesh(
-                new THREE.SphereGeometry(25, 24, 24),
-                new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.1, clearcoat: 1.0 })
-            );
-            group.add(eyeball);
-            const iris = new THREE.Mesh(
-                new THREE.SphereGeometry(14, 24, 24),
-                new THREE.MeshBasicMaterial({ color: 0xFF00FF })
-            );
-            iris.position.z = 18; iris.scale.z = 0.5;
-            group.add(iris);
-            const pupil = new THREE.Mesh(
-                new THREE.SphereGeometry(7, 24, 24),
-                new THREE.MeshBasicMaterial({ color: 0x000000 })
-            );
-            pupil.position.z = 24; pupil.scale.z = 0.4;
-            group.add(pupil);
-            return group;
-        }
-
         function create3DMessage(user, text) {
-            const w = 380, h = 160, radius = 50;
+            const w = 380, h = 160, radius = 55;
             const shape = new THREE.Shape();
             shape.moveTo(-w/2 + radius, -h/2);
             shape.lineTo(w/2 - radius, -h/2);
@@ -204,73 +177,57 @@
             shape.quadraticCurveTo(-w/2, -h/2, -w/2 + radius, -h/2);
 
             const geometry = new THREE.ExtrudeGeometry(shape, { 
-                depth: CONFIG.depth, bevelEnabled: true, bevelThickness: 15, bevelSize: 12, bevelSegments: 10 
+                depth: CONFIG.depth, bevelEnabled: true, bevelThickness: 18, bevelSize: 15, bevelSegments: 12 
             });
 
-            // 1. O BLOCO LARANJA (CORPO)
+            // Materiais Plástico Glossy
             const matOrange = new THREE.MeshPhysicalMaterial({ 
-                color: COLORS.orange, 
-                roughness: 0.2, 
-                clearcoat: 1.0, 
-                emissive: COLORS.orange, 
-                emissiveIntensity: 0.1 
+                color: COLORS.orange, roughness: 0.1, clearcoat: 1.0, reflectivity: 1.0,
+                emissive: COLORS.orange, emissiveIntensity: 0.05 
             });
-            // 2. LATERAIS QUADRICULADAS
+
             const matSide = new THREE.MeshPhysicalMaterial({ 
-                map: createCheckerTexture(), 
-                emissive: 0xffffff,
-                emissiveIntensity: 0.6,
-                clearcoat: 1.0
+                color: COLORS.white, roughness: 0.05, clearcoat: 1.0,
+                emissive: COLORS.white, emissiveIntensity: 0.1
             });
 
             const mesh = new THREE.Mesh(geometry, [matOrange, matSide]);
             const group = new THREE.Group();
             group.add(mesh);
 
-            // 3. O TEXTO (CAMADA SEPARADA NA FRENTE)
-            const textPlaneGeo = new THREE.PlaneGeometry(w, h);
+            // Camada de Texto
             const textPlaneMat = new THREE.MeshBasicMaterial({ 
-                map: createTextTexture(user, text), 
-                transparent: true,
-                side: THREE.FrontSide
+                map: createTextTexture(user, text), transparent: true 
             });
-            const textMesh = new THREE.Mesh(textPlaneGeo, textPlaneMat);
-            textMesh.position.z = CONFIG.depth + 16; // Garante que fica na frente do bevel
+            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), textPlaneMat);
+            textMesh.position.z = CONFIG.depth + 20;
             group.add(textMesh);
 
-            // Olhos Illuminati
-            const eyes = [];
-            for(let i = 0; i < 3; i++) {
-                const eye = createEye();
-                group.add(eye);
-                eyes.push({
-                    mesh: eye,
-                    angle: (i / 3) * Math.PI * 2,
-                    speed: 1.0 + Math.random(),
-                    radius: 320 + Math.random() * 80,
-                    offsetY: (Math.random() - 0.5) * 150
-                });
-            }
-
-            // Slime GOSMENTO
+            // Slime GOSMENTO (Pinga com física)
             const slimes = [];
             for(let i = 0; i < 12; i++) {
                 const sMesh = new THREE.Mesh(
-                    new THREE.SphereGeometry(15 + Math.random() * 20, 16, 16),
-                    new THREE.MeshPhysicalMaterial({ color: COLORS.slime, emissive: COLORS.slime, emissiveIntensity: 0.9, transparent: true, opacity: 0.95 })
+                    new THREE.SphereGeometry(15 + Math.random() * 20, 20, 20),
+                    new THREE.MeshPhysicalMaterial({ 
+                        color: COLORS.slime, emissive: COLORS.slime, emissiveIntensity: 0.9, 
+                        transparent: true, opacity: 0.95, clearcoat: 1.0
+                    })
                 );
-                const px = (Math.random() - 0.5) * (w + 40);
+                const px = (Math.random() - 0.5) * (w + 60);
                 sMesh.position.set(px, -h/2, Math.random() * CONFIG.depth);
                 group.add(sMesh);
-                slimes.push({ mesh: sMesh, speed: 1.5 + Math.random() * 2, offset: Math.random() * 10, bx: px, by: -h/2, dripLimit: 140 + Math.random() * 150 });
+                slimes.push({ 
+                    mesh: sMesh, speed: 1.5 + Math.random() * 2.0, offset: Math.random() * 10, 
+                    bx: px, by: -h/2, dripLimit: 140 + Math.random() * 140 
+                });
             }
 
+            // Animação de Entrada
             group.position.set(-1500, CONFIG.offsetY, 0);
             group.scale.set(0.01, 0.01, 0.01);
             messagesGroup.add(group);
             
-            activeBlocks.push({ obj: group, slimes, eyes, seed: Math.random() * 100 });
-
+            activeBlocks.push({ obj: group, slimes, seed: Math.random() * 100 });
             gsap.to(group.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: "back.out(1.7)" });
 
             if (activeBlocks.length > CONFIG.maxMessages) {
@@ -291,11 +248,6 @@
                     duration: 1.2,
                     ease: "elastic.out(1, 0.7)"
                 });
-                
-                const eyeScale = Math.max(0, 1 - (rev * 0.35)); 
-                block.eyes.forEach(e => {
-                    gsap.to(e.mesh.scale, { x: eyeScale, y: eyeScale, z: eyeScale, duration: 0.8 });
-                });
             });
         }
 
@@ -305,22 +257,18 @@
 
             activeBlocks.forEach((block, i) => {
                 const phase = t + i;
-                block.obj.rotation.x = Math.sin(phase * 0.6) * 0.1;
-                block.obj.rotation.y = Math.cos(phase * 0.4) * 0.12;
+                block.obj.rotation.x = Math.sin(phase * 0.7) * 0.1;
+                block.obj.rotation.y = Math.cos(phase * 0.5) * 0.12;
 
-                block.eyes.forEach(e => {
-                    const orbitAngle = t * e.speed + e.angle;
-                    e.mesh.position.x = Math.cos(orbitAngle) * e.radius;
-                    e.mesh.position.z = Math.sin(orbitAngle) * e.radius;
-                    e.mesh.position.y = Math.sin(t * 2 + e.angle) * 50 + e.offsetY;
-                    e.mesh.lookAt(0,0,0);
-                });
+                const wobble = Math.sin(t * 3.5 + block.seed);
+                block.obj.scale.y = 1 + wobble * 0.035;
 
                 block.slimes.forEach(s => {
                     const localT = t * s.speed + s.offset;
                     let dripCycle = (Math.sin(localT) + 1) / 2;
-                    let dripFactor = Math.pow(dripCycle, 2.5);
-                    const stretch = 1 + (dripFactor * 8.5); 
+                    let dripFactor = Math.pow(dripCycle, 2.5); 
+                    const stretch = 1 + (dripFactor * 9.0); 
+                    
                     s.mesh.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch));
                     s.mesh.position.y = s.by - (dripFactor * s.dripLimit);
                     s.mesh.material.emissiveIntensity = 0.5 + (dripCycle * 1.0);

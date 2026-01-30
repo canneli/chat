@@ -3,155 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Felipe Canneli - Only 3D Acid Lettering & Twitch Chat</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Candy Slime Orange & Green - Felipe Canneli</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Quicksand:wght@500;700&display=swap');
+
+        :root {
+            --slime-green: #9dff00;
+            --orange-candy: #ff9100;
+            --soft-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --shadow-color: rgba(255, 145, 0, 0.2);
+        }
 
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: transparent !important; 
-            font-family: 'Archivo Black', sans-serif;
-        }
-
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
+            background: transparent !important;
+            font-family: 'Fredoka', sans-serif;
             height: 100vh;
-            z-index: 1;
+            width: 100vw;
         }
 
-        /* Filtro de Saturação Y2K */
-        .hyper-filter {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            backdrop-filter: saturate(2) contrast(1.2);
-            z-index: 5;
-        }
-
-        /* Chat Container */
+        /* Container do Chat */
         #chat-container {
             position: fixed;
             bottom: 40px;
             left: 30px;
-            width: 380px;
-            height: 60vh;
+            width: 420px;
+            height: 85vh;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             z-index: 10;
+            mask-image: linear-gradient(to top, black 80%, transparent 100%);
             pointer-events: none;
-            mask-image: linear-gradient(to top, black 85%, transparent 100%);
         }
 
+        /* Estrutura da Mensagem Slime */
         .chat-message {
-            background: rgba(0, 0, 0, 0.9);
-            border: 4px solid #39ff14; /* Verde Slime */
-            padding: 12px;
-            margin-bottom: 15px;
-            color: white;
-            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            box-shadow: 8px 8px 0px #ff4500; /* Sombra Laranja Nick */
             position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 4px solid var(--soft-white);
+            /* Animação de forma orgânica (blobbing) */
+            border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+            padding: 20px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 
+                0 10px 25px var(--shadow-color),
+                inset 0 0 20px rgba(255, 255, 255, 0.4);
+            
+            animation: 
+                slimeIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                morphing 6s ease-in-out infinite alternate,
+                floating 4s ease-in-out infinite;
+            
+            transform-origin: left bottom;
         }
 
-        /* Detalhe de brilho no topo da mensagem */
+        /* Gotas de Slime Animadas */
         .chat-message::after {
             content: "";
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: #ffffff;
-            opacity: 0.5;
+            bottom: -12px;
+            left: 40px;
+            width: 30px;
+            height: 30px;
+            background: var(--soft-white);
+            border-radius: 50%;
+            box-shadow: 25px -5px 0 -2px var(--soft-white), -20px -2px 0 -4px var(--soft-white);
+            animation: drip 3s infinite ease-in-out;
+        }
+
+        /* Nome do Usuário */
+        .user-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
         .user-name {
-            color: #39ff14;
-            font-size: 14px;
+            background: linear-gradient(90deg, var(--orange-candy), var(--slime-green));
+            color: #000;
+            padding: 5px 15px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(157, 255, 0, 0.4);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            display: block;
-            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 0.5px;
         }
 
+        /* Texto da Mensagem */
         .message-text {
-            font-size: 18px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
             line-height: 1.3;
             word-wrap: break-word;
-            text-shadow: 2px 2px 0px #000;
+            color: #1a1a1a;
+            text-shadow: 0px 1px 0px rgba(255,255,255,0.8);
         }
 
-        @keyframes slideIn {
-            from { 
-                transform: translateX(-120%) skewX(-15deg); 
-                opacity: 0; 
-            }
-            to { 
-                transform: translateX(0) skewX(0); 
-                opacity: 1; 
-            }
+        /* --- ANIMAÇÕES --- */
+
+        /* Entrada Elástica */
+        @keyframes slimeIn {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Flutuar suavemente */
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Alterar a forma do Slime (Blob) */
+        @keyframes morphing {
+            0% { border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%; }
+            50% { border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%; }
+            100% { border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%; }
+        }
+
+        /* Efeito de gota balançando */
+        @keyframes drip {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(5px) scale(1.1, 0.9); }
         }
 
         .fade-out {
-            animation: fadeOut 0.6s forwards;
+            animation: slimeOut 0.5s ease-in forwards;
         }
 
-        @keyframes fadeOut {
-            to { 
-                opacity: 0; 
-                transform: translateX(-50px) scale(0.8); 
-                filter: blur(10px);
-            }
+        @keyframes slimeOut {
+            to { opacity: 0; transform: scale(0.5) filter(blur(10px)); }
         }
 
-        /* Indicador de Status do Chat */
+        /* Status inferior */
         #chat-status {
             position: fixed;
-            bottom: 10px;
+            bottom: 15px;
             left: 30px;
-            font-size: 10px;
-            color: #39ff14;
-            text-transform: uppercase;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--orange-candy);
             z-index: 11;
-            letter-spacing: 2px;
-            opacity: 0.6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .status-blob {
+            width: 12px;
+            height: 12px;
+            background: var(--slime-green);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morphing 2s infinite alternate;
+            box-shadow: 0 0 10px var(--slime-green);
         }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
     <div id="chat-container"></div>
-    <div id="chat-status">SISTEMA ONLINE // FELIPECANNELI</div>
-    <div class="hyper-filter"></div>
+    
+    <div id="chat-status">
+        <div class="status-blob"></div>
+        <span>SLIME_STREAM // ORANGE_CANDY // FELIPECANNELI</span>
+    </div>
 
     <script>
-        let scene, camera, renderer, clock;
-        
-        // Configurações do Lettering 3D
-        let textBlock, textTexture, textCanvas, textContext;
-        let phraseIndex = 0;
-        
-        const phrases = [
-            "SILÊNCIO, O ARTISTA ESTÁ EXAUSTO",
-            "FUI BUSCAR O BANHEIRO, JÁ VOLTO",
-            "FUI USAR A PIPOCA",
-            "BUSCANDO PACIÊNCIA (ESTÁ ESGOTADA)",
-            "SAÍ PRA VER SE EU TAVA NA ESQUINA",
-            "CARREGANDO MAIS UM ERRO NA VIDA",
-            "O CÉREBRO FOI COMER E NÃO VOLTOU",
-            "PROCESSANDO MINHA FALTA DE TALENTO",
-            "EM BUSCA DA DIGNIDADE PERDIDA",
-            "FUI ALI ME CANCELAR E JÁ VOLTO"
-        ];
-        let lastPhraseChange = 0;
-
-        // TWITCH CHAT CONFIG
         const channel = 'felipecanneli';
         const chatContainer = document.getElementById('chat-container');
 
@@ -163,9 +193,7 @@
                 socket.send('NICK justinfan' + Math.floor(Math.random() * 10000));
                 socket.send('JOIN #' + channel);
                 
-                // Mensagens de Boas-vindas para teste visual
-                setTimeout(() => addChatMessage("SISTEMA", "CONEXÃO ESTABELECIDA COM SUCESSO."), 500);
-                setTimeout(() => addChatMessage("FELIPE", "CHAT ACID MODO ON. DIGITA AÍ."), 1500);
+                setTimeout(() => addChatMessage("SLIME_BOT", "CONEXÃO DOCE ESTABELECIDA! 🍊💚"), 500);
             };
 
             socket.onmessage = (event) => {
@@ -183,7 +211,6 @@
             };
 
             socket.onclose = () => {
-                console.log("Chat fechado. Reconectando...");
                 setTimeout(connectTwitchChat, 3000);
             };
         }
@@ -191,158 +218,33 @@
         function addChatMessage(user, message) {
             const msgDiv = document.createElement('div');
             msgDiv.className = 'chat-message';
+
             msgDiv.innerHTML = `
-                <span class="user-name">${user}</span>
+                <div class="user-wrapper">
+                    <span class="user-name">${user}</span>
+                </div>
                 <span class="message-text">${message}</span>
             `;
             
             chatContainer.appendChild(msgDiv);
 
-            // Mantém as últimas 7 mensagens
-            if (chatContainer.childNodes.length > 7) {
-                chatContainer.removeChild(chatContainer.firstChild);
+            // Controle de quantidade
+            if (chatContainer.childNodes.length > 6) {
+                const first = chatContainer.firstChild;
+                first.classList.add('fade-out');
+                setTimeout(() => first.remove(), 500);
             }
 
-            // Desaparece após 20 segundos
+            // Auto-remover
             setTimeout(() => {
-                msgDiv.classList.add('fade-out');
-                setTimeout(() => {
-                    if (msgDiv.parentNode) msgDiv.remove();
-                }, 600);
-            }, 20000);
+                if (msgDiv.parentNode) {
+                    msgDiv.classList.add('fade-out');
+                    setTimeout(() => msgDiv.remove(), 500);
+                }
+            }, 25000);
         }
 
-        function init() {
-            scene = new THREE.Scene();
-
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 0, 85);
-
-            renderer = new THREE.WebGLRenderer({ 
-                canvas: document.getElementById('bg-canvas'), 
-                antialias: true,
-                alpha: true 
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setClearColor(0x000000, 0); 
-            
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.6; 
-
-            clock = new THREE.Clock();
-
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-            scene.add(ambientLight);
-
-            const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
-            keyLight.position.set(20, 50, 50);
-            scene.add(keyLight);
-
-            const rimLight = new THREE.PointLight(0x39ff14, 25, 120);
-            rimLight.position.set(-40, 30, 30);
-            scene.add(rimLight);
-
-            create3DLettering();
-            connectTwitchChat();
-
-            window.addEventListener('resize', onWindowResize);
-            animate();
-        }
-
-        function create3DLettering() {
-            textCanvas = document.createElement('canvas');
-            textCanvas.width = 1024;
-            textCanvas.height = 256;
-            textContext = textCanvas.getContext('2d');
-            
-            textTexture = new THREE.CanvasTexture(textCanvas);
-            
-            const geometry = new THREE.BoxGeometry(65, 15, 8);
-            
-            const chromeMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, 
-                metalness: 1, 
-                roughness: 0.05,
-                emissive: 0x39ff14,
-                emissiveIntensity: 0.08
-            });
-            
-            const faceMat = new THREE.MeshStandardMaterial({ 
-                map: textTexture, 
-                transparent: true,
-                metalness: 0.1,
-                roughness: 0.2
-            });
-            
-            const materials = [
-                chromeMat, chromeMat, chromeMat, chromeMat, faceMat, faceMat
-            ];
-            
-            textBlock = new THREE.Mesh(geometry, materials);
-            scene.add(textBlock);
-            
-            updateLettering(phrases[0]);
-        }
-
-        function updateLettering(text) {
-            const ctx = textContext;
-            ctx.clearRect(0, 0, 1024, 256);
-            
-            ctx.fillStyle = '#39ff14'; 
-            ctx.beginPath();
-            ctx.roundRect(10, 10, 1004, 236, 60);
-            ctx.fill();
-            
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 25;
-            ctx.stroke();
-
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 8;
-            ctx.stroke();
-            
-            ctx.fillStyle = '#000000';
-            ctx.font = '900 44px "Arial Black", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            ctx.shadowColor = '#ff4500'; 
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 8;
-            ctx.shadowOffsetY = 8;
-            
-            ctx.fillText(text, 512, 128);
-            
-            textTexture.needsUpdate = true;
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
-
-            if (time - lastPhraseChange > 6) {
-                phraseIndex = (phraseIndex + 1) % phrases.length;
-                updateLettering(phrases[phraseIndex]);
-                lastPhraseChange = time;
-            }
-            
-            if (textBlock) {
-                textBlock.rotation.y = Math.sin(time * 0.4) * 0.3;
-                textBlock.rotation.x = Math.cos(time * 0.3) * 0.12;
-                textBlock.position.y = Math.sin(time * 1.4) * 5;
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        window.onload = init;
+        window.onload = connectTwitchChat;
     </script>
 </body>
 </html>
